@@ -14,7 +14,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // ------------------------------------------------------------
 function buatToken(user) {
   return jwt.sign(
-    { user_id: user.user_id, email: user.email },
+    { user_id: user.user_idad, email: user.email },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
