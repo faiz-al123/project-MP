@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import loginImage from '../../assets/login1.png'
 
-function MailIcon() {
+function UserIcon() {
   return (
     <svg
       width="20"
@@ -14,8 +14,8 @@ function MailIcon() {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <rect x="3" y="5" width="18" height="14" rx="1" />
-      <path d="M3 7l9 7 9-7" />
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4 3.5-7 8-7s8 3 8 7" />
     </svg>
   )
 }
@@ -82,10 +82,9 @@ function EyeIcon({ hidden }) {
 
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
 
   const [formData, setFormData] = useState({
-    email: '',
+    usernameOrEmail: '',
     password: '',
   })
 
@@ -102,9 +101,8 @@ function LoginPage() {
     event.preventDefault()
 
     console.log('Data login:', {
-      email: formData.email,
+      usernameOrEmail: formData.usernameOrEmail,
       password: formData.password,
-      rememberMe,
     })
 
     // Backend belum dihubungkan.
@@ -113,6 +111,7 @@ function LoginPage() {
 
   return (
     <main className="login-page">
+
       {/* =========================
           BAGIAN KIRI
       ========================== */}
@@ -128,6 +127,7 @@ function LoginPage() {
       ========================== */}
       <section className="login-right">
         <div className="login-container">
+
           <h1>Selamat Datang</h1>
 
           <p className="login-subtitle">
@@ -135,17 +135,18 @@ function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit}>
-            {/* EMAIL */}
+
+            {/* USERNAME / EMAIL */}
             <div className="login-input">
               <span className="input-icon">
-                <MailIcon />
+                <UserIcon />
               </span>
 
               <input
                 type="text"
-                name="email"
-                placeholder="Email atau nomor HP"
-                value={formData.email}
+                name="usernameOrEmail"
+                placeholder="Username atau Email"
+                value={formData.usernameOrEmail}
                 onChange={handleChange}
                 autoComplete="username"
               />
@@ -182,31 +183,6 @@ function LoginPage() {
               </button>
             </div>
 
-            {/* REMEMBER + FORGOT PASSWORD */}
-            <div className="login-options">
-              <label className="remember">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(event) =>
-                    setRememberMe(event.target.checked)
-                  }
-                />
-
-                <span className="custom-checkbox"></span>
-
-                <span>ingat saya</span>
-              </label>
-
-              <a
-                href="#"
-                className="forgot-password"
-                onClick={(event) => event.preventDefault()}
-              >
-                Lupa password?
-              </a>
-            </div>
-
             {/* LOGIN BUTTON */}
             <button
               type="submit"
@@ -214,6 +190,7 @@ function LoginPage() {
             >
               Masuk
             </button>
+
           </form>
 
           {/* REGISTER */}
@@ -227,8 +204,10 @@ function LoginPage() {
               Daftar disini
             </a>
           </p>
+
         </div>
       </section>
+
     </main>
   )
 }
