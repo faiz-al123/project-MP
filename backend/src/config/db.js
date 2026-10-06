@@ -1,11 +1,4 @@
 // Koneksi ke database SQLite FiNote.
-//
-// CATATAN BUAT KAMU: file ini pakai modul `node:sqlite` bawaan Node.js
-// (tersedia sejak Node 22.5+), jadi TIDAK perlu `npm install` driver
-// database apa pun. Kalau nanti proyek mau pindah ke `better-sqlite3`
-// (versi yang lebih stabil, non-experimental), cukup ganti isi file ini
-// saja — kode di models/ tidak perlu diubah sama sekali, karena cara
-// pakainya (`db.prepare(sql).run/get/all(...)`) sama persis.
 
 const { DatabaseSync } = require('node:sqlite');
 const path = require('path');

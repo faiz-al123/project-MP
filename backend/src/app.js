@@ -14,7 +14,6 @@ app.use('/api', routes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
-// Harus PALING TERAKHIR, setelah semua route
 app.use(errorMiddleware);
 
 module.exports = app;

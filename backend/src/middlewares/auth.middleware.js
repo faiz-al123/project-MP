@@ -1,8 +1,3 @@
-// Dipakai untuk melindungi endpoint selain register/login (transaksi, budget,
-// dst), yang baru dikerjakan di sprint berikutnya. Belum dipasang ke route
-// manapun sekarang - disiapkan di sini supaya ownership.middleware.js nanti
-// (S4) tinggal pakai req.user yang sudah diisi middleware ini.
-
 const jwt = require('jsonwebtoken');
 const AppError = require('../utils/appError');
 const { JWT_SECRET } = require('../config/env');
