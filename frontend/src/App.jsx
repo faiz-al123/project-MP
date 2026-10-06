@@ -1,32 +1,48 @@
 import { useEffect, useState } from 'react'
 import LoginPage from './pages/auth/LoginPage'
+import RegisterPage from './pages/auth/RegisterPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
-import { clearSession, getCurrentUser, getToken } from './api/auth.api'
+import {
+  clearSession,
+  getCurrentUser,
+  getToken,
+} from './api/auth.api'
 import './App.css'
 
 function App() {
   const [user, setUser] = useState(null)
-  // Kalau ada token tersimpan, tunggu verifikasi ke /auth/me dulu
-  // sebelum memutuskan menampilkan login atau dashboard.
-  const [checkingSession, setCheckingSession] = useState(() => Boolean(getToken()))
+
+  const [page, setPage] = useState('login')
+
+  const [checkingSession, setCheckingSession] = useState(() =>
+    Boolean(getToken()),
+  )
 
   useEffect(() => {
     const token = getToken()
-    if (!token) return
+
+    if (!token) {
+      return
+    }
 
     let cancelled = false
 
     getCurrentUser(token)
       .then((currentUser) => {
-        if (!cancelled) setUser(currentUser)
+        if (!cancelled) {
+          setUser(currentUser)
+        }
       })
       .catch((error) => {
-        // Token kedaluwarsa / tidak valid / user sudah dihapus -> buang sesi.
-        // Error jaringan (backend mati) tidak menghapus token.
-        if (error.status === 401 || error.status === 404) clearSession()
+        // Token kedaluwarsa / tidak valid / user sudah dihapus.
+        if (error.status === 401 || error.status === 404) {
+          clearSession()
+        }
       })
       .finally(() => {
-        if (!cancelled) setCheckingSession(false)
+        if (!cancelled) {
+          setCheckingSession(false)
+        }
       })
 
     return () => {
@@ -34,9 +50,20 @@ function App() {
     }
   }, [])
 
+  const handleLoginSuccess = (loggedInUser) => {
+    setUser(loggedInUser)
+    setPage('login')
+  }
+
+  const handleRegisterSuccess = (registeredUser) => {
+    setUser(registeredUser)
+    setPage('login')
+  }
+
   const handleLogout = () => {
     clearSession()
     setUser(null)
+    setPage('login')
   }
 
   if (checkingSession) {
@@ -44,10 +71,29 @@ function App() {
   }
 
   if (user) {
-    return <DashboardPage user={user} onLogout={handleLogout} />
+    return (
+      <DashboardPage
+        user={user}
+        onLogout={handleLogout}
+      />
+    )
   }
 
-  return <LoginPage onLoginSuccess={setUser} />
+  if (page === 'register') {
+    return (
+      <RegisterPage
+        onRegisterSuccess={handleRegisterSuccess}
+        onLoginClick={() => setPage('login')}
+      />
+    )
+  }
+
+  return (
+    <LoginPage
+      onLoginSuccess={handleLoginSuccess}
+      onRegisterClick={() => setPage('register')}
+    />
+  )
 }
 
 export default App
