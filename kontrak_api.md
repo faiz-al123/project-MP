@@ -531,28 +531,3 @@ Route untuk transaksi, kategori, budget, dan tagihan baru akan ditambahkan setel
 | `GET` | `/api/auth/me` | ✅ | Mengambil data pengguna saat ini |
 | `GET` | `/health` | ❌ | Mengecek status backend |
 
----
-
-# Status Implementasi API
-
-### Sudah tersedia
-
-- [x] Register
-- [x] Login
-- [x] JWT Authentication
-- [x] Current User (`/auth/me`)
-- [x] Health Check
-- [x] Validasi input register/login
-- [x] Error response standar
-- [x] CORS
-- [x] SQLite database
-
-### Belum tersedia
-
-- [ ] CRUD Transaksi
-- [ ] CRUD Kategori
-- [ ] CRUD Budget
-- [ ] CRUD Tagihan
-- [ ] Refresh Token
-- [ ] Logout endpoint
-- [ ] Custom 404 JSON handler
