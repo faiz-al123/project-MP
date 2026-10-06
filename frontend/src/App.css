@@ -295,3 +295,85 @@
     font-size: 14px;
   }
 }
+
+/* ========================================
+   LOGIN - PESAN ERROR & STATE LOADING
+======================================== */
+
+.login-error {
+  margin: -14px 0 20px;
+  padding: 10px 14px;
+
+  background: #fdecec;
+  border: 1px solid #f1aeb5;
+  border-radius: 6px;
+
+  color: #b42318;
+
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.login-button:disabled {
+  background: #9bbcf2;
+
+  cursor: not-allowed;
+}
+
+.login-button:disabled:hover {
+  background: #9bbcf2;
+}
+
+
+/* ========================================
+   HALAMAN SEMENTARA SETELAH LOGIN
+======================================== */
+
+.dashboard-placeholder {
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+  padding: 24px;
+
+  background: #f0f3ff;
+
+  color: #26344d;
+
+  text-align: center;
+}
+
+.dashboard-placeholder h1 {
+  margin: 0;
+
+  font-size: 28px;
+}
+
+.dashboard-placeholder p {
+  margin: 0;
+
+  color: #526078;
+
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.dashboard-logout {
+  width: 160px;
+
+  margin-top: 24px;
+}
+
+.session-loading {
+  margin: 0;
+  padding: 40px;
+
+  color: #526078;
+
+  text-align: center;
+}

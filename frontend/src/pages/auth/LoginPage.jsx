@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import loginImage from '../../assets/login1.png'
+import { login, saveSession } from '../../api/auth.api'
 
 function UserIcon() {
   return (
@@ -80,11 +81,15 @@ function EyeIcon({ hidden }) {
   )
 }
 
-function LoginPage() {
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function LoginPage({ onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   const [formData, setFormData] = useState({
-    usernameOrEmail: '',
+    email: '',
     password: '',
   })
 
@@ -95,18 +100,51 @@ function LoginPage() {
       ...previous,
       [name]: value,
     }))
+
+    if (errorMessage) setErrorMessage('')
   }
 
-  const handleSubmit = (event) => {
+  // Aturan sama dengan backend/src/validators/auth.validator.js (validateLogin)
+  const validateForm = () => {
+    const email = formData.email.trim()
+
+    if (!email || !formData.password) {
+      return 'Email dan password wajib diisi.'
+    }
+
+    if (!EMAIL_REGEX.test(email)) {
+      return 'Format email tidak valid.'
+    }
+
+    return ''
+  }
+
+  const handleSubmit = async (event) => {
     event.preventDefault()
+    if (isLoading) return
 
-    console.log('Data login:', {
-      usernameOrEmail: formData.usernameOrEmail,
-      password: formData.password,
-    })
+    const validationError = validateForm()
+    if (validationError) {
+      setErrorMessage(validationError)
+      return
+    }
 
-    // Backend belum dihubungkan.
-    // Nanti akan menggunakan auth.api.js.
+    setIsLoading(true)
+    setErrorMessage('')
+
+    try {
+      const { user, token } = await login({
+        email: formData.email.trim(),
+        password: formData.password,
+      })
+
+      saveSession({ token, user })
+      onLoginSuccess(user)
+    } catch (error) {
+      setErrorMessage(error.message)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -134,21 +172,28 @@ function LoginPage() {
             masuk ke akun FiNote kamu
           </p>
 
-          <form onSubmit={handleSubmit}>
+          {/* PESAN ERROR */}
+          {errorMessage && (
+            <p className="login-error" role="alert">
+              {errorMessage}
+            </p>
+          )}
 
-            {/* USERNAME / EMAIL */}
+          <form onSubmit={handleSubmit} noValidate>
+
+            {/* EMAIL */}
             <div className="login-input">
               <span className="input-icon">
                 <UserIcon />
               </span>
 
               <input
-                type="text"
-                name="usernameOrEmail"
-                placeholder="Username atau Email"
-                value={formData.usernameOrEmail}
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={formData.email}
                 onChange={handleChange}
-                autoComplete="username"
+                autoComplete="email"
               />
             </div>
 
@@ -187,8 +232,9 @@ function LoginPage() {
             <button
               type="submit"
               className="login-button"
+              disabled={isLoading}
             >
-              Masuk
+              {isLoading ? 'Memproses...' : 'Masuk'}
             </button>
 
           </form>
