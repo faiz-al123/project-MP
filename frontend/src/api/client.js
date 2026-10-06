@@ -1,8 +1,7 @@
-// Helper fetch bersama untuk semua file *.api.js (auth, transaksi, budget, dst).
-// Backend FiNote selalu membalas { success, message, data }, jadi di sini kita
-// ubah semua response gagal menjadi ApiError dengan pesan siap tampil.
+const BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
+).replace(/\/$/, '')
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api').replace(/\/$/, '')
 const TIMEOUT_MS = 15000
 
 export class ApiError extends Error {
@@ -14,36 +13,55 @@ export class ApiError extends Error {
   }
 }
 
-export async function request(path, { method = 'GET', body, token } = {}) {
+export async function request(
+  path,
+  { method = 'GET', body, token } = {},
+) {
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
-  const headers = { Accept: 'application/json' }
-  if (body !== undefined) headers['Content-Type'] = 'application/json'
-  if (token) headers.Authorization = `Bearer ${token}`
+  const timer = setTimeout(() => {
+    controller.abort()
+  }, TIMEOUT_MS)
 
-  let res
+  const headers = {
+    Accept: 'application/json',
+  }
+
+  if (body !== undefined) {
+    headers['Content-Type'] = 'application/json'
+  }
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  }
+
+  let response
+
   try {
-    res = await fetch(`${BASE_URL}${path}`, {
+    response = await fetch(`${BASE_URL}${path}`, {
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     })
-  } catch (err) {
-    const timedOut = err.name === 'AbortError'
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new ApiError(
+        'Server terlalu lama merespons. Pastikan backend berjalan dengan benar.',
+      )
+    }
+
     throw new ApiError(
-      timedOut
-        ? 'Server terlalu lama merespons. Coba lagi.'
-        : 'Tidak dapat terhubung ke server. Pastikan backend sudah berjalan.',
+      `Tidak dapat terhubung ke backend di ${BASE_URL}. Pastikan backend sudah berjalan di port 3000.`,
     )
   } finally {
     clearTimeout(timer)
   }
 
-  // Response bisa saja bukan JSON (mis. halaman 404 HTML bawaan Express)
+  const text = await response.text()
+
   let data = null
-  const text = await res.text()
+
   if (text) {
     try {
       data = JSON.parse(text)
@@ -52,10 +70,11 @@ export async function request(path, { method = 'GET', body, token } = {}) {
     }
   }
 
-  if (!res.ok || data?.success === false) {
+  if (!response.ok || data?.success === false) {
     throw new ApiError(
-      data?.message || `Permintaan gagal (kode ${res.status}).`,
-      res.status,
+      data?.message ||
+        `Permintaan gagal dengan kode ${response.status}.`,
+      response.status,
       data,
     )
   }
