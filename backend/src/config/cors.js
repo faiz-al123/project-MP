@@ -1,4 +1,3 @@
-// test
 const { CORS_ORIGIN } = require('./env');
 
 const allowedOrigins = [
