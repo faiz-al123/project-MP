@@ -1,5 +1,3 @@
-// user.model.js
-
 const db = require('../config/db');
 
 function findByEmail(email) {
