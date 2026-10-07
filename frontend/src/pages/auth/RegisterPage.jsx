@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import loginImage from '../../assets/login1.png'
-import { login, saveSession } from '../../api/auth.api'
+import registerImage from '../../assets/register.png'
+import { register, saveSession } from '../../api/auth.api'
 
 function UserIcon() {
   return (
@@ -17,6 +17,25 @@ function UserIcon() {
     >
       <circle cx="12" cy="8" r="4" />
       <path d="M4 21c0-4 3.5-7 8-7s8 3 8 7" />
+    </svg>
+  )
+}
+
+function MailIcon() {
+  return (
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="5" width="18" height="14" rx="1" />
+      <path d="m3 7 9 7 9-7" />
     </svg>
   )
 }
@@ -83,14 +102,17 @@ function EyeIcon({ hidden }) {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-function LoginPage({ onLoginSuccess, onRegisterClick }) {
+function RegisterPage({ onRegisterSuccess, onLoginClick }) {
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
   const [formData, setFormData] = useState({
+    username: '',
     email: '',
     password: '',
+    confirmPassword: '',
   })
 
   const handleChange = (event) => {
@@ -107,14 +129,28 @@ function LoginPage({ onLoginSuccess, onRegisterClick }) {
   }
 
   const validateForm = () => {
+    const username = formData.username.trim()
     const email = formData.email.trim()
 
-    if (!email || !formData.password) {
-      return 'Email dan password wajib diisi.'
+    if (
+      !username ||
+      !email ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
+      return 'Username, email, dan password wajib diisi.'
     }
 
     if (!EMAIL_REGEX.test(email)) {
       return 'Format email tidak valid.'
+    }
+
+    if (formData.password.length < 8) {
+      return 'Password minimal 8 karakter.'
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      return 'Konfirmasi password tidak sesuai.'
     }
 
     return ''
@@ -136,58 +172,59 @@ function LoginPage({ onLoginSuccess, onRegisterClick }) {
     setErrorMessage('')
 
     try {
-      const { user, token } = await login({
+      const { user, token } = await register({
+        nama: formData.username.trim(),
         email: formData.email.trim(),
         password: formData.password,
       })
 
       saveSession({ token, user })
-      onLoginSuccess(user)
+
+      onRegisterSuccess(user)
     } catch (error) {
-      setErrorMessage(error.message)
+      if (error.status === 409) {
+        setErrorMessage('akun anda sudah pernah terdaftar')
+      } else {
+        setErrorMessage(error.message)
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <main className="login-page">
+    <main className="register-page">
 
       {/* =========================
           BAGIAN KIRI
       ========================== */}
-      <section className="login-left">
-        <img
-          src={loginImage}
-          alt="FiNote - Kelola Keuangan, Raih Masa Depan"
-        />
-      </section>
+      <section className="register-left">
+        <div className="register-container">
 
-      {/* =========================
-          BAGIAN KANAN
-      ========================== */}
-      <section className="login-right">
-        <div className="login-container">
-
-          <h1>Selamat Datang</h1>
-
-          <p className="login-subtitle">
-            masuk ke akun FiNote kamu
-          </p>
-
-          {/* PESAN ERROR */}
-          {errorMessage && (
-            <p className="login-error" role="alert">
-              {errorMessage}
-            </p>
-          )}
+          <h1>Daftar Akun</h1>
 
           <form onSubmit={handleSubmit} noValidate>
 
-            {/* EMAIL */}
-            <div className="login-input">
+            {/* USERNAME */}
+            <div className="register-input">
               <span className="input-icon">
                 <UserIcon />
+              </span>
+
+              <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                value={formData.username}
+                onChange={handleChange}
+                autoComplete="username"
+              />
+            </div>
+
+            {/* EMAIL */}
+            <div className="register-input">
+              <span className="input-icon">
+                <MailIcon />
               </span>
 
               <input
@@ -201,7 +238,7 @@ function LoginPage({ onLoginSuccess, onRegisterClick }) {
             </div>
 
             {/* PASSWORD */}
-            <div className="login-input">
+            <div className="register-input">
               <span className="input-icon">
                 <LockIcon />
               </span>
@@ -212,7 +249,7 @@ function LoginPage({ onLoginSuccess, onRegisterClick }) {
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
-                autoComplete="current-password"
+                autoComplete="new-password"
               />
 
               <button
@@ -231,34 +268,83 @@ function LoginPage({ onLoginSuccess, onRegisterClick }) {
               </button>
             </div>
 
-            {/* LOGIN BUTTON */}
+            {/* KONFIRMASI PASSWORD */}
+            <div className="register-input">
+              <span className="input-icon">
+                <LockIcon />
+              </span>
+
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                placeholder="konfirmasi Password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                autoComplete="new-password"
+              />
+
+              <button
+                type="button"
+                className="password-button"
+                onClick={() =>
+                  setShowConfirmPassword((previous) => !previous)
+                }
+                aria-label={
+                  showConfirmPassword
+                    ? 'Sembunyikan konfirmasi password'
+                    : 'Tampilkan konfirmasi password'
+                }
+              >
+                <EyeIcon hidden={!showConfirmPassword} />
+              </button>
+            </div>
+
+            {/* PESAN ERROR */}
+            {errorMessage && (
+              <p className="register-error" role="alert">
+                <span className="register-error-icon">ⓘ</span>
+                {errorMessage}
+              </p>
+            )}
+
+            {/* DAFTAR */}
             <button
               type="submit"
-              className="login-button"
+              className="register-button"
               disabled={isLoading}
             >
-              {isLoading ? 'Memproses...' : 'Masuk'}
+              {isLoading ? 'Memproses...' : 'Daftar'}
             </button>
 
           </form>
 
-          {/* REGISTER */}
-          <p className="register-text">
-            belum punya akun?{' '}
+          {/* LOGIN */}
+          <p className="login-text">
+            Sudah punya akun?{' '}
             <button
               type="button"
-              className="register-link register-link-button"
-              onClick={onRegisterClick}
+              className="login-link"
+              onClick={onLoginClick}
             >
-              Daftar disini
+              masuk disini
             </button>
           </p>
 
         </div>
       </section>
 
+      {/* =========================
+          BAGIAN KANAN
+      ========================== */}
+      <section className="register-right">
+        <img
+          src={registerImage}
+          alt="FiNote - Kelola Keuangan, Raih Masa Depan"
+        />
+      </section>
+
     </main>
   )
 }
 
-export default LoginPage
+export default RegisterPage
