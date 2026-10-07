@@ -1,3 +1,5 @@
+// auth.validator.js
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD = 8;
 
@@ -22,17 +24,18 @@ function validateRegister(body) {
 }
 
 function validateLogin(body) {
-  const identifier = String(body.identifier || '').trim();
+  const email = String(body.email || '').trim();
   const password = String(body.password || '');
 
-  if (!identifier || !password) {
-    return 'Username/email dan password wajib diisi.';
+  if (!email || !password) {
+    return 'Email dan password wajib diisi.';
+  }
+
+  if (!EMAIL_REGEX.test(email)) {
+    return 'Format email tidak valid.';
   }
 
   return null;
 }
 
-module.exports = {
-  validateRegister,
-  validateLogin,
-};
+module.exports = { validateRegister, validateLogin };

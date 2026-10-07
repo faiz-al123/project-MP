@@ -1,3 +1,5 @@
+auth.service.js
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/user.model');
@@ -8,14 +10,9 @@ const SALT_ROUNDS = 10;
 
 function buatToken(user) {
   return jwt.sign(
-    {
-      user_id: user.user_id,
-      email: user.email,
-    },
+    { user_id: user.user_id, email: user.email },
     JWT_SECRET,
-    {
-      expiresIn: JWT_EXPIRES_IN,
-    },
+    { expiresIn: JWT_EXPIRES_IN },
   );
 }
 
@@ -38,12 +35,7 @@ async function register({ nama, email, password }) {
 
   try {
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-
-    const userBaru = userModel.create({
-      nama,
-      email,
-      hashedPassword,
-    });
+    const userBaru = userModel.create({ nama, email, hashedPassword });
 
     return {
       user: dataUserAman(userBaru),
@@ -61,15 +53,13 @@ async function register({ nama, email, password }) {
   }
 }
 
-async function login({ identifier, password }) {
-  identifier = identifier.trim();
+async function login({ email, password }) {
+  email = email.trim().toLowerCase();
+  const user = userModel.findByEmail(email);
 
-  // Bisa login menggunakan username (nama) ATAU email
-  const user = userModel.findByIdentifier(identifier);
-
-  // Pesan dibuat sama untuk identifier tidak terdaftar dan password salah.
+  // Pesan sengaja dibuat sama untuk email tidak terdaftar dan password salah.
   if (!user || !(await bcrypt.compare(password, user.password))) {
-    throw new AppError('Username/email atau password salah.', 401);
+    throw new AppError('Email atau password salah.', 401);
   }
 
   return {
@@ -88,8 +78,4 @@ async function getCurrentUser(userId) {
   return dataUserAman(user);
 }
 
-module.exports = {
-  register,
-  login,
-  getCurrentUser,
-};
+module.exports = { register, login, getCurrentUser };
