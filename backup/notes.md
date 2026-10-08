@@ -1,0 +1,1 @@
+## salin kode yang benar di folder backup!
